@@ -64,6 +64,43 @@ Los tipos posibles son: Arroz, Carne/Pollo, Embutido, Huevos, Lácteos, Legumbre
       return Response.json(JSON.parse(jsonMatch[0]));
     }
 
+    if (action === 'text-to-recipe') {
+      const result = await model.generateContent(
+        `El usuario ha pegado el siguiente texto de una receta (probablemente generado por otra IA o copiado de internet).
+Analiza el texto y extrae la información estructurada.
+
+IMPORTANTE:
+- El campo "instrucciones" debe ser el texto ORIGINAL tal cual, sin modificar ni resumir.
+- Los ingredientes deben estar limpios y separados, uno por línea con guión.
+- Identifica la categoría de cocción y el tipo de plato.
+
+Texto de la receta:
+"""
+${data.text}
+"""
+
+Responde SOLO con un JSON válido (sin markdown, sin backticks) con esta estructura exacta:
+{
+  "nombre": "Nombre del plato",
+  "ingredientes": "- ingrediente 1\n- ingrediente 2\n...",
+  "instrucciones": "el texto original completo de las instrucciones tal cual",
+  "categoria": ["Vitrocerámica"],
+  "tipo": ["Carne/Pollo"],
+  "tiempoPreparacion": 30,
+  "observaciones": ""
+}
+Las categorías posibles son: Airfryer, Vitrocerámica, Olla GM, Mambo, Sin cocinar.
+Los tipos posibles son: Arroz, Bebida, Caldo, Canapé, Carne/Pollo, Croquetas, Embutido, Empanadas, Fruta, Frutos secos, Hamburguesas, Huevos, Lácteos, Legumbres, Marisco, Pasta, Pastel salado, Patatas, Pescado, Pizza, Puré, Queso, Salsa, Setas, Sopas/Cremas, Tortilla, Tortitas, Verdura, Yogurt.
+Elige los que apliquen. Si no estás seguro de la categoría, usa ["Vitrocerámica"].`
+      );
+      const text = result.response.text();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return Response.json({ error: 'No se pudo extraer la receta', raw: text }, { status: 500 });
+      }
+      return Response.json(JSON.parse(jsonMatch[0]));
+    }
+
     if (action === 'suggest') {
       const result = await model.generateContent(
         `El usuario pregunta: "${data.question}"

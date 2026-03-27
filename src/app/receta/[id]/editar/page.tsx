@@ -7,9 +7,9 @@ import RecipeForm from '../../../_components/RecipeForm';
 export default function EditarReceta({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params instanceof Promise ? use(params) : params;
+  const { id } = use(params);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
 

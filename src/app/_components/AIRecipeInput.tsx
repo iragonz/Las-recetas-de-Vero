@@ -5,7 +5,7 @@ import RecipeForm from './RecipeForm';
 import type { Recipe } from '../_lib/types';
 
 interface AIRecipeInputProps {
-  mode: 'photo' | 'voice';
+  mode: 'photo' | 'voice' | 'text';
 }
 
 export default function AIRecipeInput({ mode }: AIRecipeInputProps) {
@@ -13,6 +13,7 @@ export default function AIRecipeInput({ mode }: AIRecipeInputProps) {
   const [generatedRecipe, setGeneratedRecipe] = useState<Omit<Recipe, 'id'> | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [pastedText, setPastedText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
@@ -128,6 +129,38 @@ export default function AIRecipeInput({ mode }: AIRecipeInputProps) {
     setLoading(false);
   }
 
+  async function processText() {
+    if (!pastedText.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'text-to-recipe',
+          data: { text: pastedText },
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setGeneratedRecipe({
+        ...data,
+        favorito: false,
+        nivelIvan: '',
+        nivelVero: '',
+        link: '',
+        fotos: [],
+        instrucciones: data.instrucciones || pastedText,
+        observaciones: data.observaciones || '',
+        tiempoPreparacion: data.tiempoPreparacion || null,
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Error al procesar el texto');
+    }
+    setLoading(false);
+  }
+
   if (generatedRecipe) {
     return (
       <div>
@@ -149,7 +182,7 @@ export default function AIRecipeInput({ mode }: AIRecipeInputProps) {
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="animate-spin h-10 w-10 border-3 border-primary border-t-transparent rounded-full" />
         <p className="text-sm text-text-muted">
-          {mode === 'photo' ? 'Analizando imagen...' : 'Procesando texto...'}
+          {mode === 'photo' ? 'Analizando imagen...' : mode === 'text' ? 'Extrayendo receta del texto...' : 'Procesando texto...'}
         </p>
       </div>
     );
@@ -175,6 +208,32 @@ export default function AIRecipeInput({ mode }: AIRecipeInputProps) {
           onChange={handlePhoto}
           className="hidden"
         />
+      </div>
+    );
+  }
+
+  if (mode === 'text') {
+    return (
+      <div className="flex flex-col items-center gap-4 py-6">
+        <div className="w-full max-w-2xl">
+          <p className="text-sm text-text-muted mb-3">
+            Pega el texto de la receta (de ChatGPT, una web, etc.) y la IA extraera automaticamente el nombre, ingredientes, categoria y tipo. Las instrucciones se guardan tal cual.
+          </p>
+          <textarea
+            value={pastedText}
+            onChange={(e) => setPastedText(e.target.value)}
+            rows={12}
+            className="w-full rounded-xl border border-border bg-bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder="Pega aqui el texto completo de la receta..."
+          />
+          <button
+            onClick={processText}
+            disabled={!pastedText.trim()}
+            className="mt-3 w-full rounded-xl bg-primary text-white py-3 text-sm font-semibold hover:bg-primary-dark active:scale-95 disabled:opacity-50"
+          >
+            ✨ Extraer receta con IA
+          </button>
+        </div>
       </div>
     );
   }

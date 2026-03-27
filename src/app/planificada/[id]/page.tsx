@@ -8,9 +8,9 @@ import RecipeImage from '../../_components/RecipeImage';
 export default function PlannedRecipeDetail({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params instanceof Promise ? use(params) : params;
+  const { id } = use(params);
   const router = useRouter();
   const [recipe, setRecipe] = useState<PlannedRecipe | null>(null);
   const [loading, setLoading] = useState(true);

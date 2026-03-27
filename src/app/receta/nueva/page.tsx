@@ -5,7 +5,7 @@ import RecipeForm from '../../_components/RecipeForm';
 import AIRecipeInput from '../../_components/AIRecipeInput';
 
 export default function NuevaReceta() {
-  const [aiMode, setAiMode] = useState<'photo' | 'voice' | null>(null);
+  const [aiMode, setAiMode] = useState<'photo' | 'voice' | 'text' | null>(null);
 
   return (
     <div>
@@ -35,6 +35,14 @@ export default function NuevaReceta() {
           }`}
         >
           🎤 Por voz
+        </button>
+        <button
+          onClick={() => setAiMode('text')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium border ${
+            aiMode === 'text' ? 'bg-primary text-white border-primary' : 'bg-bg-card border-border text-text-muted'
+          }`}
+        >
+          📋 Desde texto IA
         </button>
       </div>
 
