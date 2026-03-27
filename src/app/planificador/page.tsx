@@ -8,15 +8,18 @@ const STORAGE_KEY = 'recetario-weekly-plan';
 
 export default function Planificador() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [plan, setPlan] = useState<WeeklyPlan>({});
+  const [plan, setPlan] = useState<WeeklyPlan>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) { try { return JSON.parse(saved); } catch { /* ignore */ } }
+    }
+    return {};
+  });
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<{ day: string; meal: 'comida' | 'cena' } | null>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setPlan(JSON.parse(saved));
-
     fetch('/api/recipes')
       .then((r) => r.json())
       .then(setRecipes)

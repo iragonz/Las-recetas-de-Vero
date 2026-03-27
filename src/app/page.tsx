@@ -63,8 +63,7 @@ export default function Home() {
 
   // Planificadas state
   const [planned, setPlanned] = useState<PlannedRecipe[]>([]);
-  const [loadingPlanned, setLoadingPlanned] = useState(false);
-  const [plannedLoaded, setPlannedLoaded] = useState(false);
+  const [plannedLoadState, setPlannedLoadState] = useState<'idle' | 'loading' | 'done'>('idle');
   const [pSearch, setPSearch] = useState('');
   const [pCategoria, setPCategoria] = useState('');
   const [pTipo, setPTipo] = useState('');
@@ -85,22 +84,24 @@ export default function Home() {
   }, []);
 
   // Load planificadas on first tab switch
+  const shouldLoadPlanned = tab === 'planificadas' && plannedLoadState === 'idle';
+  if (shouldLoadPlanned && plannedLoadState === 'idle') {
+    setPlannedLoadState('loading');
+  }
   useEffect(() => {
-    if (tab === 'planificadas' && !plannedLoaded) {
-      setLoadingPlanned(true);
-      fetch('/api/planned')
-        .then((r) => r.json())
-        .then((data) => {
-          if (Array.isArray(data)) setPlanned(data);
-          else setPError(data.error || JSON.stringify(data));
-        })
-        .catch(() => setPError('Error de conexión'))
-        .finally(() => {
-          setLoadingPlanned(false);
-          setPlannedLoaded(true);
-        });
-    }
-  }, [tab, plannedLoaded]);
+    if (plannedLoadState !== 'loading') return;
+    let cancelled = false;
+    fetch('/api/planned')
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (Array.isArray(data)) setPlanned(data);
+        else setPError(data.error || JSON.stringify(data));
+      })
+      .catch(() => { if (!cancelled) setPError('Error de conexión'); })
+      .finally(() => { if (!cancelled) setPlannedLoadState('done'); });
+    return () => { cancelled = true; };
+  }, [plannedLoadState]);
 
   const filtered = useMemo(() => {
     const result = recipes.filter((r) => {
@@ -236,7 +237,7 @@ export default function Home() {
             {filteredPlanned.length} receta{filteredPlanned.length !== 1 ? 's' : ''} planificada{filteredPlanned.length !== 1 ? 's' : ''}
           </p>
 
-          {loadingPlanned ? (
+          {plannedLoadState === 'loading' ? (
             <div className="flex justify-center py-20">
               <div className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
             </div>
