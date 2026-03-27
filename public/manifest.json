@@ -1,11 +1,11 @@
 {
-  "name": "Recetario",
-  "short_name": "Recetario",
-  "description": "Nuestro recetario personal",
+  "name": "Las Recetas de Vero",
+  "short_name": "Recetas Vero",
+  "description": "Nuestro recetario con mucho amor",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fefae0",
-  "theme_color": "#e85d04",
+  "background_color": "#fffbeb",
+  "theme_color": "#c2410c",
   "icons": [
     {
       "src": "/icon-192.svg",

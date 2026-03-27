@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="32" fill="#e85d04"/>
-  <text x="96" y="120" font-size="100" text-anchor="middle" font-family="sans-serif">📖</text>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#g)"/>
+  <text x="96" y="125" font-size="100" text-anchor="middle" font-family="sans-serif">&#127859;</text>
 </svg>

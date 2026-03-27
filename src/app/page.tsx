@@ -131,40 +131,46 @@ export default function Home() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Recetario</h1>
-        <div className="flex gap-2">
-          {tab === 'hechas' && <RandomRecipeButton recipes={filtered} />}
-          <Link
-            href={tab === 'hechas' ? '/receta/nueva' : '/planificada/nueva'}
-            className="flex items-center gap-1.5 rounded-xl bg-success text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:opacity-90 active:scale-95"
-          >
-            + Nueva
-          </Link>
+      {/* Header */}
+      <div className="mb-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-text">Las Recetas de Vero</h1>
+            <p className="text-xs text-text-muted mt-0.5">Nuestro recetario con mucho amor</p>
+          </div>
+          <div className="flex gap-2">
+            {tab === 'hechas' && <RandomRecipeButton recipes={filtered} />}
+            <Link
+              href={tab === 'hechas' ? '/receta/nueva' : '/planificada/nueva'}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-success to-emerald-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg active:scale-95"
+            >
+              + Nueva
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-xl border border-border overflow-hidden mb-4">
+      <div className="flex rounded-2xl border border-border/60 overflow-hidden mb-5 shadow-sm">
         <button
           onClick={() => setTab('hechas')}
-          className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2.5 text-sm font-medium transition-all ${
             tab === 'hechas'
-              ? 'bg-primary text-white'
+              ? 'bg-gradient-to-r from-primary to-primary-light text-white'
               : 'bg-bg-card text-text-muted hover:text-primary'
           }`}
         >
-          📖 Hechas {recipes.length > 0 && <span className="text-xs opacity-75">({recipes.length})</span>}
+          Hechas {recipes.length > 0 && <span className="text-xs opacity-75">({recipes.length})</span>}
         </button>
         <button
           onClick={() => setTab('planificadas')}
-          className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2.5 text-sm font-medium transition-all ${
             tab === 'planificadas'
-              ? 'bg-primary text-white'
+              ? 'bg-gradient-to-r from-primary to-primary-light text-white'
               : 'bg-bg-card text-text-muted hover:text-primary'
           }`}
         >
-          📋 Por hacer {planned.length > 0 && <span className="text-xs opacity-75">({planned.length})</span>}
+          Por hacer {planned.length > 0 && <span className="text-xs opacity-75">({planned.length})</span>}
         </button>
       </div>
 
@@ -205,7 +211,7 @@ export default function Home() {
               No se encontraron recetas con esos filtros
             </p>
           ) : viewMode === 'grid' ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-2">
               {filtered.map((recipe) => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
@@ -251,7 +257,7 @@ export default function Home() {
               No se encontraron recetas planificadas
             </p>
           ) : pViewMode === 'grid' ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-2">
               {filteredPlanned.map((recipe) => (
                 <PlannedRecipeCard key={recipe.id} recipe={recipe} />
               ))}

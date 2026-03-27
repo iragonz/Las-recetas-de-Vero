@@ -9,8 +9,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Recetario",
-  description: "Nuestro recetario personal",
+  title: "Las Recetas de Vero",
+  description: "Nuestro recetario personal con mucho amor",
   manifest: "/manifest.json",
 };
 
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#e85d04",
+  themeColor: "#c2410c",
 };
 
 export default function RootLayout({
@@ -33,9 +33,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-full flex flex-col font-sans pattern-bg">
         <NavBar />
-        <main className="flex-1 max-w-6xl mx-auto w-full px-4 pb-20 pt-4">
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-24 pt-4">
           {children}
         </main>
         <script

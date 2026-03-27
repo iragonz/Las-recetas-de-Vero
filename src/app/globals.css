@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #e85d04;
-  --primary-light: #f48c06;
-  --primary-dark: #dc2f02;
-  --bg: #fefae0;
+  --primary: #c2410c;
+  --primary-light: #ea580c;
+  --primary-dark: #9a3412;
+  --accent: #d97706;
+  --accent-light: #fbbf24;
+  --bg: #fffbeb;
   --bg-card: #ffffff;
-  --text: #1a1a1a;
-  --text-muted: #6b7280;
-  --border: #e5e7eb;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --bg-warm: #fef3c7;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --border: #e7e5e4;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
 }
 
 @theme inline {
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
   --color-bg: var(--bg);
   --color-bg-card: var(--bg-card);
+  --color-bg-warm: var(--bg-warm);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-border: var(--border);
@@ -35,20 +41,38 @@ body {
   color: var(--text);
 }
 
-/* Rating badge colors */
-.badge-sobresaliente { background-color: #22c55e; color: white; }
-.badge-notable { background-color: #3b82f6; color: white; }
-.badge-bien { background-color: #f59e0b; color: white; }
-.badge-suspenso { background-color: #ef4444; color: white; }
-.badge-sinprobar { background-color: #9ca3af; color: white; }
+/* Rating badge colors with gradients */
+.badge-sobresaliente { background: linear-gradient(135deg, #16a34a, #22c55e); color: white; }
+.badge-notable { background: linear-gradient(135deg, #2563eb, #60a5fa); color: white; }
+.badge-bien { background: linear-gradient(135deg, #d97706, #fbbf24); color: white; }
+.badge-suspenso { background: linear-gradient(135deg, #dc2626, #f87171); color: white; }
+.badge-sinprobar { background: linear-gradient(135deg, #a8a29e, #d6d3d1); color: white; }
 
 /* Smooth transitions */
 * {
-  transition-property: background-color, border-color, color, opacity, transform;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hide scrollbar for planning drag */
+/* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Glass effect for navbar */
+.glass {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Card hover glow */
+.card-glow:hover {
+  box-shadow: 0 8px 30px rgba(194, 65, 12, 0.12);
+}
+
+/* Subtle pattern bg */
+.pattern-bg {
+  background-image: radial-gradient(circle at 25px 25px, rgba(194, 65, 12, 0.04) 2px, transparent 0);
+  background-size: 50px 50px;
+}
