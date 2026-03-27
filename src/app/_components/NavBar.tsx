@@ -17,7 +17,7 @@ export default function NavBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-      <div className="max-w-2xl mx-auto flex justify-around">
+      <div className="max-w-5xl mx-auto flex justify-around">
         {navItems.map((item) => {
           const isActive = item.href === '/'
             ? pathname === '/'

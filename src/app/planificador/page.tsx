@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Recipe, WeeklyPlan } from '../_lib/types';
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const LS_PREFIX = 'recetario-plan-';
 
 type WeekTab = 'current' | 'next';
 
@@ -66,10 +67,39 @@ export default function Planificador() {
   useEffect(() => {
     let cancelled = false;
     const monday = getMondayISO(weekTab);
+    const lsKey = LS_PREFIX + monday;
+
+    // Try API first, fall back to localStorage
     fetch(`/api/planner?week=${monday}`)
       .then((r) => r.json())
-      .then((data) => { if (!cancelled) setPlan(data ?? {}); })
-      .catch(() => { if (!cancelled) setPlan({}); })
+      .then((data) => {
+        if (cancelled) return;
+        const serverPlan = data && typeof data === 'object' && !data.error ? data : {};
+        const hasServerData = Object.keys(serverPlan).length > 0;
+
+        if (hasServerData) {
+          setPlan(serverPlan);
+          localStorage.setItem(lsKey, JSON.stringify(serverPlan));
+        } else {
+          // Fallback to localStorage
+          const saved = localStorage.getItem(lsKey);
+          if (saved) {
+            try { setPlan(JSON.parse(saved)); } catch { setPlan({}); }
+          } else {
+            setPlan({});
+          }
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // API failed, use localStorage
+        const saved = localStorage.getItem(lsKey);
+        if (saved) {
+          try { setPlan(JSON.parse(saved)); } catch { setPlan({}); }
+        } else {
+          setPlan({});
+        }
+      })
       .finally(() => { if (!cancelled) setPlanLoaded(true); });
     return () => { cancelled = true; };
   }, [weekTab, planVersion]);
@@ -77,6 +107,9 @@ export default function Planificador() {
   function savePlan(newPlan: WeeklyPlan) {
     setPlan(newPlan);
     const monday = getMondayISO(weekTab);
+    // Always save to localStorage as fallback
+    localStorage.setItem(LS_PREFIX + monday, JSON.stringify(newPlan));
+    // Also save to KV API
     fetch(`/api/planner?week=${monday}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

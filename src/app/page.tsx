@@ -211,7 +211,7 @@ export default function Home() {
               No se encontraron recetas con esos filtros
             </p>
           ) : viewMode === 'grid' ? (
-            <div className="grid gap-3 grid-cols-2">
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filtered.map((recipe) => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
@@ -257,7 +257,7 @@ export default function Home() {
               No se encontraron recetas planificadas
             </p>
           ) : pViewMode === 'grid' ? (
-            <div className="grid gap-3 grid-cols-2">
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filteredPlanned.map((recipe) => (
                 <PlannedRecipeCard key={recipe.id} recipe={recipe} />
               ))}
