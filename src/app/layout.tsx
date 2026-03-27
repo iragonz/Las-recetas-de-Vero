@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import NavBar from "./_components/NavBar";
+import InstallBanner from "./_components/InstallBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-full flex flex-col font-sans pattern-bg">
+        <InstallBanner />
         <NavBar />
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-24 pt-4">
           {children}
