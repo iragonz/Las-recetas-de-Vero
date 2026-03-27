@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #e85d04;
+  --primary-light: #f48c06;
+  --primary-dark: #dc2f02;
+  --bg: #fefae0;
+  --bg-card: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-bg: var(--bg);
+  --color-bg-card: var(--bg-card);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Rating badge colors */
+.badge-sobresaliente { background-color: #22c55e; color: white; }
+.badge-notable { background-color: #3b82f6; color: white; }
+.badge-bien { background-color: #f59e0b; color: white; }
+.badge-suspenso { background-color: #ef4444; color: white; }
+.badge-sinprobar { background-color: #9ca3af; color: white; }
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Hide scrollbar for planning drag */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
