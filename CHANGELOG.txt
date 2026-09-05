@@ -1,0 +1,107 @@
+===============================================================
+ LAS RECETAS DE VERO
+ Historial de versiones
+===============================================================
+
+ Versión actual: 1.2.0  (5 de septiembre de 2026)
+
+ Repositorio: github.com/iragonz/Las-recetas-de-Vero
+ Se despliega solo en Vercel al subir cambios a la rama "main".
+
+
+---------------------------------------------------------------
+ 1.2.0  ·  5 de septiembre de 2026
+---------------------------------------------------------------
+
+ Las categorías y los tipos ahora salen de Notion.
+
+ * Las listas de Categoría y Tipo estaban escritas a mano dentro
+   de la app y se habían quedado antiguas: ofrecía 5 categorías y
+   29 tipos cuando en Notion ya había 8 y 34. Ahora se leen
+   directamente del esquema de las bases de datos.
+
+ * Cada base mantiene sus propias listas, no se mezclan. La de
+   recetas hechas tiene 8 categorías y 34 tipos; la de recetas por
+   hacer tiene 9 categorías y 41 tipos.
+
+ * Los niveles de gusto también se leen de Notion, y cada persona
+   usa los suyos: el de Iván tiene 5 opciones y el de Vero 4.
+
+ * Si añades una opción nueva en Notion, aparece en la app en
+   menos de 5 minutos, sin tocar nada.
+
+ * Si Notion no responde, la app usa las listas antiguas como
+   respaldo en vez de quedarse sin opciones.
+
+ Pendiente conocido: el orden de las valoraciones al ordenar por
+ "Mejor Iván" o en la pantalla Top sigue fijo en el código. Un
+ nivel nuevo se podría asignar, pero al ordenar quedaría el último.
+
+
+---------------------------------------------------------------
+ 1.1.0  ·  5 de septiembre de 2026
+---------------------------------------------------------------
+
+ Fotos, dado y campo de enlace.
+
+ * Cámara directa: al añadir fotos hay dos botones, "Cámara" y
+   "Galería". Antes solo había un selector de archivos, que en el
+   móvil no abría la cámara.
+
+ * Cambiar la foto principal: los botones de estrella y de borrar
+   de las miniaturas solo aparecían al pasar el ratón por encima,
+   así que en el móvil eran invisibles. Ahora se ven siempre y son
+   más grandes para el dedo.
+
+ * Visor de fotos: al tocar cualquier foto se abre a pantalla
+   completa. Se pasa de una a otra deslizando el dedo, con
+   contador y cierre tocando el fondo.
+
+ * Dado "¿Qué comemos hoy?": al pulsarlo se elige entre recetas
+   hechas, recetas por hacer, o las dos mezcladas. Antes solo
+   sacaba hechas y solo aparecía en esa pestaña.
+
+ * Enlace opcional: el campo Link exigía una dirección web
+   completa y bloqueaba el guardado sin avisar. Ahora admite
+   cualquier texto, o quedarse vacío.
+
+ * Los formularios avisan si el guardado falla, en vez de llevarte
+   a una página rota.
+
+
+---------------------------------------------------------------
+ 1.0.0  ·  27 de marzo de 2026
+---------------------------------------------------------------
+
+ Primera versión en uso.
+
+ * Recetario con dos listas: "Hechas" y "Por hacer", cada una en
+   su propia base de datos de Notion.
+
+ * Botón "¡Ya la hicimos!" para pasar una receta de la lista de
+   pendientes a la de hechas.
+
+ * Buscador y filtros por categoría, tipo, valoración y favoritos.
+   Orden por nombre, tiempo o valoraciones. Vista de tarjetas o de
+   lista.
+
+ * Fotos alojadas en ImgBB, con foto principal y galería.
+
+ * Valoraciones independientes para Iván y para Vero, y pantalla
+   de rankings (Top general, mejores de cada uno, y las que os
+   gustan a los dos).
+
+ * Alta de recetas con inteligencia artificial (Google Gemini):
+   desde una foto del plato, dictando por voz, o pegando el texto
+   de una receta copiada de internet.
+
+ * Planificador semanal con comida y cena para cada día, guardado
+   en Vercel KV para que lo veáis los dos.
+
+ * Lista de la compra, que se puede generar desde el planificador.
+
+ * Acceso con contraseña.
+
+ * Instalable en el móvil como aplicación (PWA).
+
+===============================================================
