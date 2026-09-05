@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PlannedRecipe } from '../../_lib/types';
 import RecipeImage from '../../_components/RecipeImage';
+import PhotoLightbox from '../../_components/PhotoLightbox';
 
 export default function PlannedRecipeDetail({
   params,
@@ -14,6 +15,7 @@ export default function PlannedRecipeDetail({
   const router = useRouter();
   const [recipe, setRecipe] = useState<PlannedRecipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightbox, setLightbox] = useState<number | null>(null);
   const [moving, setMoving] = useState(false);
 
   useEffect(() => {
@@ -72,11 +74,18 @@ export default function PlannedRecipeDetail({
       </button>
 
       <div className="bg-bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-        <RecipeImage
-          src={recipe.fotos?.[0]}
-          nombre={recipe.nombre}
-          size="lg"
-        />
+        {recipe.fotos && recipe.fotos.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setLightbox(0)}
+            aria-label="Ver foto en grande"
+            className="block w-full"
+          >
+            <RecipeImage src={recipe.fotos[0]} nombre={recipe.nombre} size="lg" />
+          </button>
+        ) : (
+          <RecipeImage nombre={recipe.nombre} size="lg" />
+        )}
 
         <div className="p-6">
           <div className="flex justify-between items-start">
@@ -127,12 +136,19 @@ export default function PlannedRecipeDetail({
               <h2 className="text-lg font-semibold mb-2">Galería</h2>
               <div className="grid grid-cols-2 gap-2">
                 {recipe.fotos.slice(1).map((url, i) => (
-                  <img
+                  <button
                     key={i}
-                    src={url}
-                    alt={`${recipe.nombre} ${i + 2}`}
-                    className="w-full h-32 object-cover rounded-xl"
-                  />
+                    type="button"
+                    onClick={() => setLightbox(i + 1)}
+                    aria-label={`Ver foto ${i + 2}`}
+                    className="active:scale-95"
+                  >
+                    <img
+                      src={url}
+                      alt={`${recipe.nombre} ${i + 2}`}
+                      className="w-full h-32 object-cover rounded-xl"
+                    />
+                  </button>
                 ))}
               </div>
             </div>
@@ -174,6 +190,14 @@ export default function PlannedRecipeDetail({
           </div>
         </div>
       </div>
+      {lightbox !== null && recipe.fotos && recipe.fotos.length > 0 && (
+        <PhotoLightbox
+          fotos={recipe.fotos}
+          index={lightbox}
+          nombre={recipe.nombre}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Recipe, NivelGusto } from '../_lib/types';
 import { CATEGORIAS, TIPOS, NIVELES_GUSTO } from '../_lib/types';
+import { normalizeLink } from '../_lib/link';
 
 interface RecipeFormProps {
   initial?: Recipe;
@@ -13,6 +14,7 @@ interface RecipeFormProps {
 export default function RecipeForm({ initial, mode }: RecipeFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const [nombre, setNombre] = useState(initial?.nombre ?? '');
   const [ingredientes, setIngredientes] = useState(initial?.ingredientes ?? '');
@@ -35,10 +37,31 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
     return arr.includes(item) ? arr.filter((i) => i !== item) : [...arr, item];
   }
 
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'No se pudo subir la imagen');
+      setFotos((prev) => [...prev, data.url]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al subir la imagen');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!nombre.trim()) return;
     setSaving(true);
+    setError('');
 
     const data = {
       nombre: nombre.trim(),
@@ -47,7 +70,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
       ingredientes,
       instrucciones,
       fotos,
-      link: link.trim(),
+      link: normalizeLink(link),
       nivelIvan,
       nivelVero,
       observaciones,
@@ -63,20 +86,23 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
           body: JSON.stringify(data),
         });
         const recipe = await res.json();
+        if (!res.ok || !recipe?.id) throw new Error(recipe?.error || 'No se pudo crear la receta');
         router.push(`/receta/${recipe.id}`);
       } else {
-        await fetch(`/api/recipes/${initial!.id}`, {
+        const res = await fetch(`/api/recipes/${initial!.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result?.error || 'No se pudieron guardar los cambios');
         router.push(`/receta/${initial!.id}`);
       }
     } catch (err) {
       console.error('Error saving recipe:', err);
-      alert('Error al guardar la receta');
+      setError(err instanceof Error ? err.message : 'Error al guardar la receta');
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   return (
@@ -117,78 +143,69 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
       <div>
         <label className="block text-sm font-medium mb-2">Fotos</label>
         {fotos.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
+          <div className="flex flex-wrap gap-3 mb-3">
             {fotos.map((url, i) => (
-              <div key={i} className="relative group">
+              <div key={i} className="relative">
                 <img src={url} alt={`Foto ${i + 1}`} className={`h-20 w-20 object-cover rounded-lg border-2 ${i === 0 ? 'border-primary' : 'border-border'}`} />
                 {i === 0 ? (
-                  <span className="absolute top-0.5 left-0.5 text-[8px] bg-primary text-white px-1 rounded">Principal</span>
+                  <span className="absolute bottom-0.5 left-0.5 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded font-medium">Principal</span>
                 ) : (
                   <button
                     type="button"
                     title="Hacer principal"
-                    onClick={() => {
-                      const reordered = [url, ...fotos.filter((_, j) => j !== i)];
-                      setFotos(reordered);
-                    }}
-                    className="absolute top-0.5 left-0.5 bg-black/50 text-white rounded w-5 h-5 text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-primary"
+                    aria-label="Hacer foto principal"
+                    onClick={() => setFotos([url, ...fotos.filter((_, j) => j !== i)])}
+                    className="absolute bottom-0.5 left-0.5 bg-black/60 text-white rounded-full w-7 h-7 text-sm flex items-center justify-center active:scale-90 hover:bg-primary"
                   >
                     ★
                   </button>
                 )}
                 <button
                   type="button"
+                  title="Quitar foto"
+                  aria-label="Quitar foto"
                   onClick={() => setFotos(fotos.filter((_, j) => j !== i))}
-                  className="absolute -top-1.5 -right-1.5 bg-danger text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100"
+                  className="absolute -top-2 -right-2 bg-danger text-white rounded-full w-7 h-7 text-sm flex items-center justify-center shadow active:scale-90"
                 >
-                  x
+                  ✕
                 </button>
               </div>
             ))}
           </div>
         )}
         <div className="flex gap-2">
-          <label className="rounded-xl bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary-dark active:scale-95 cursor-pointer flex items-center gap-1.5">
-            {uploading ? (
-              <>
-                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                Subiendo...
-              </>
-            ) : (
-              <>📷 Subir foto</>
-            )}
+          <label className={`flex-1 justify-center rounded-xl bg-primary text-white px-4 py-2.5 text-sm font-medium hover:bg-primary-dark active:scale-95 cursor-pointer flex items-center gap-1.5 ${uploading ? 'opacity-60 pointer-events-none' : ''}`}>
+            📷 Cámara
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              disabled={uploading}
+              onChange={handleUpload}
+            />
+          </label>
+          <label className={`flex-1 justify-center rounded-xl bg-primary/10 text-primary px-4 py-2.5 text-sm font-medium hover:bg-primary/20 active:scale-95 cursor-pointer flex items-center gap-1.5 ${uploading ? 'opacity-60 pointer-events-none' : ''}`}>
+            🖼️ Galería
             <input
               type="file"
               accept="image/*"
               className="hidden"
               disabled={uploading}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                setUploading(true);
-                try {
-                  const form = new FormData();
-                  form.append('file', file);
-                  const res = await fetch('/api/upload', { method: 'POST', body: form });
-                  const data = await res.json();
-                  if (data.url) {
-                    setFotos([...fotos, data.url]);
-                  } else {
-                    alert(data.error || 'Error al subir imagen');
-                  }
-                } catch {
-                  alert('Error al subir imagen');
-                } finally {
-                  setUploading(false);
-                  e.target.value = '';
-                }
-              }}
+              onChange={handleUpload}
             />
           </label>
         </div>
+        {uploading && (
+          <p className="flex items-center gap-2 text-xs text-text-muted mt-2">
+            <span className="animate-spin h-3.5 w-3.5 border-2 border-primary border-t-transparent rounded-full" />
+            Subiendo foto...
+          </p>
+        )}
         <div className="flex gap-2 mt-2">
           <input
-            type="url"
+            type="text"
+            inputMode="url"
             value={newFotoUrl}
             onChange={(e) => setNewFotoUrl(e.target.value)}
             placeholder="...o pega URL de imagen"
@@ -207,7 +224,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
             Añadir
           </button>
         </div>
-        <p className="text-[10px] text-text-muted mt-1">La primera foto será la imagen principal de la tarjeta. Puedes subir desde tu dispositivo o pegar una URL.</p>
+        <p className="text-[10px] text-text-muted mt-1">La primera foto es la principal. Toca ★ en cualquier otra para ponerla de principal, o ✕ para quitarla.</p>
       </div>
 
       <div>
@@ -290,13 +307,14 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Link / Vídeo</label>
+        <label className="block text-sm font-medium mb-1">Link / Vídeo <span className="text-text-muted font-normal">(opcional)</span></label>
         <input
-          type="url"
+          type="text"
+          inputMode="url"
           value={link}
           onChange={(e) => setLink(e.target.value)}
           className="w-full rounded-xl border border-border bg-bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          placeholder="https://..."
+          placeholder="https://... o déjalo vacío"
         />
       </div>
 
@@ -319,6 +337,13 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
         />
         <span className="text-sm">❤️ Marcar como favorita</span>
       </label>
+
+      {error && (
+        <div className="flex items-start gap-2 text-sm text-danger bg-danger/5 rounded-xl px-3 py-2.5">
+          <span>⚠️</span>
+          <span className="break-words">{error}</span>
+        </div>
+      )}
 
       <div className="flex gap-3 pt-2">
         <button

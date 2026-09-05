@@ -63,7 +63,7 @@ export default function Home() {
 
   // Planificadas state
   const [planned, setPlanned] = useState<PlannedRecipe[]>([]);
-  const [plannedLoadState, setPlannedLoadState] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [loadingPlanned, setLoadingPlanned] = useState(true);
   const [pSearch, setPSearch] = useState('');
   const [pCategoria, setPCategoria] = useState('');
   const [pTipo, setPTipo] = useState('');
@@ -71,7 +71,8 @@ export default function Home() {
   const [pViewMode, setPViewMode] = useState<ViewMode>('grid');
   const [pError, setPError] = useState('');
 
-  // Load hechas on mount
+  // Las dos listas se cargan al abrir: el dado necesita ambas aunque no
+  // hayas entrado todavía en la pestaña "Por hacer".
   useEffect(() => {
     fetch('/api/recipes')
       .then((r) => r.json())
@@ -81,27 +82,16 @@ export default function Home() {
       })
       .catch(() => setError('Error de conexión'))
       .finally(() => setLoadingRecipes(false));
-  }, []);
 
-  // Load planificadas on first tab switch
-  const shouldLoadPlanned = tab === 'planificadas' && plannedLoadState === 'idle';
-  if (shouldLoadPlanned && plannedLoadState === 'idle') {
-    setPlannedLoadState('loading');
-  }
-  useEffect(() => {
-    if (plannedLoadState !== 'loading') return;
-    let cancelled = false;
     fetch('/api/planned')
       .then((r) => r.json())
       .then((data) => {
-        if (cancelled) return;
         if (Array.isArray(data)) setPlanned(data);
         else setPError(data.error || JSON.stringify(data));
       })
-      .catch(() => { if (!cancelled) setPError('Error de conexión'); })
-      .finally(() => { if (!cancelled) setPlannedLoadState('done'); });
-    return () => { cancelled = true; };
-  }, [plannedLoadState]);
+      .catch(() => setPError('Error de conexión'))
+      .finally(() => setLoadingPlanned(false));
+  }, []);
 
   const filtered = useMemo(() => {
     const result = recipes.filter((r) => {
@@ -139,7 +129,7 @@ export default function Home() {
             <p className="text-xs text-text-muted mt-0.5">Nuestro recetario con mucho amor</p>
           </div>
           <div className="flex gap-2">
-            {tab === 'hechas' && <RandomRecipeButton recipes={filtered} />}
+            <RandomRecipeButton hechas={filtered} porHacer={filteredPlanned} />
             <Link
               href={tab === 'hechas' ? '/receta/nueva' : '/planificada/nueva'}
               className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-success to-emerald-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg active:scale-95"
@@ -243,7 +233,7 @@ export default function Home() {
             {filteredPlanned.length} receta{filteredPlanned.length !== 1 ? 's' : ''} planificada{filteredPlanned.length !== 1 ? 's' : ''}
           </p>
 
-          {plannedLoadState === 'loading' ? (
+          {loadingPlanned ? (
             <div className="flex justify-center py-20">
               <div className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
             </div>
