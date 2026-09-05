@@ -1,6 +1,6 @@
 'use client';
 
-import { CATEGORIAS, TIPOS, NIVELES_GUSTO } from '../_lib/types';
+import { useOptions } from '../_lib/useOptions';
 
 export type SortOption = 'nombre-asc' | 'nombre-desc' | 'tiempo-asc' | 'tiempo-desc' | 'ivan-desc' | 'vero-desc' | 'favoritos';
 export type ViewMode = 'grid' | 'list';
@@ -23,6 +23,9 @@ interface FilterBarProps {
 }
 
 export default function FilterBar(props: FilterBarProps) {
+  const options = useOptions().hechas;
+  const valoraciones = [...new Set([...options.nivelIvan, ...options.nivelVero])];
+
   return (
     <div className="space-y-3 mb-6">
       <input
@@ -40,7 +43,7 @@ export default function FilterBar(props: FilterBarProps) {
           className="rounded-lg border border-border bg-bg-card px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">Todas las categorías</option>
-          {CATEGORIAS.map((c) => (
+          {options.categorias.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
@@ -51,7 +54,7 @@ export default function FilterBar(props: FilterBarProps) {
           className="rounded-lg border border-border bg-bg-card px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">Todos los tipos</option>
-          {TIPOS.map((t) => (
+          {options.tipos.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
@@ -62,7 +65,7 @@ export default function FilterBar(props: FilterBarProps) {
           className="rounded-lg border border-border bg-bg-card px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">Cualquier valoración</option>
-          {NIVELES_GUSTO.map((n) => (
+          {valoraciones.map((n) => (
             <option key={n} value={n}>{n}</option>
           ))}
         </select>

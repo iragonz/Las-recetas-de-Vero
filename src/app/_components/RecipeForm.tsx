@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Recipe, NivelGusto } from '../_lib/types';
-import { CATEGORIAS, TIPOS, NIVELES_GUSTO } from '../_lib/types';
+import { useOptions } from '../_lib/useOptions';
 import { normalizeLink } from '../_lib/link';
 
 interface RecipeFormProps {
@@ -13,6 +13,7 @@ interface RecipeFormProps {
 
 export default function RecipeForm({ initial, mode }: RecipeFormProps) {
   const router = useRouter();
+  const options = useOptions().hechas;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -230,7 +231,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
       <div>
         <label className="block text-sm font-medium mb-2">Categoría</label>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIAS.map((cat) => (
+          {options.categorias.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -250,7 +251,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
       <div>
         <label className="block text-sm font-medium mb-2">Tipo</label>
         <div className="flex flex-wrap gap-2">
-          {TIPOS.map((t) => (
+          {options.tipos.map((t) => (
             <button
               key={t}
               type="button"
@@ -276,7 +277,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
             className="w-full rounded-xl border border-border bg-bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">Sin valorar</option>
-            {NIVELES_GUSTO.map((n) => (
+            {options.nivelIvan.map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
@@ -289,7 +290,7 @@ export default function RecipeForm({ initial, mode }: RecipeFormProps) {
             className="w-full rounded-xl border border-border bg-bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">Sin valorar</option>
-            {NIVELES_GUSTO.map((n) => (
+            {options.nivelVero.map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>

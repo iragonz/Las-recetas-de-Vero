@@ -1,4 +1,4 @@
-import type { Recipe, PlannedRecipe } from './types';
+import type { Recipe, PlannedRecipe, AppOptions } from './types';
 
 // Cache compartido entre todas las rutas API
 let recipesCache: { data: Recipe[]; timestamp: number } | null = null;
@@ -46,4 +46,22 @@ export function getCachedPlannedRecipe(id: string): PlannedRecipe | null {
 
 export function invalidatePlannedCache(): void {
   plannedCache = null;
+}
+
+// Opciones seleccionables de las bases de Notion (mismo TTL de 5 minutos)
+let optionsCache: { data: AppOptions; timestamp: number } | null = null;
+
+export function getCachedOptions(): AppOptions | null {
+  if (optionsCache && Date.now() - optionsCache.timestamp < CACHE_TTL) {
+    return optionsCache.data;
+  }
+  return null;
+}
+
+export function setCachedOptions(data: AppOptions): void {
+  optionsCache = { data, timestamp: Date.now() };
+}
+
+export function invalidateOptionsCache(): void {
+  optionsCache = null;
 }

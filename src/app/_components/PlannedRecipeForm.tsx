@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PlannedRecipe } from '../_lib/types';
-import { CATEGORIAS, TIPOS } from '../_lib/types';
+import { useOptions } from '../_lib/useOptions';
 import { normalizeLink } from '../_lib/link';
 
 interface PlannedRecipeFormProps {
@@ -13,6 +13,7 @@ interface PlannedRecipeFormProps {
 
 export default function PlannedRecipeForm({ initial, mode }: PlannedRecipeFormProps) {
   const router = useRouter();
+  const options = useOptions().planificadas;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -220,7 +221,7 @@ export default function PlannedRecipeForm({ initial, mode }: PlannedRecipeFormPr
       <div>
         <label className="block text-sm font-medium mb-2">Categoría</label>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIAS.map((cat) => (
+          {options.categorias.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -240,7 +241,7 @@ export default function PlannedRecipeForm({ initial, mode }: PlannedRecipeFormPr
       <div>
         <label className="block text-sm font-medium mb-2">Tipo</label>
         <div className="flex flex-wrap gap-2">
-          {TIPOS.map((t) => (
+          {options.tipos.map((t) => (
             <button
               key={t}
               type="button"

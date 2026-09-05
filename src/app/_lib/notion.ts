@@ -1,4 +1,4 @@
-import type { Recipe, NivelGusto, PlannedRecipe } from './types';
+import type { Recipe, NivelGusto, PlannedRecipe, AppOptions } from './types';
 
 const NOTION_API = 'https://api.notion.com/v1';
 const headers = {
@@ -378,4 +378,40 @@ export async function movePlannedToDone(id: string): Promise<Recipe> {
   });
   await deletePlannedRecipe(id);
   return recipe;
+}
+
+// --- Opciones seleccionables (esquema de las bases) ---
+
+/** Nombres de las opciones de una propiedad select o multi_select. */
+function extractPropertyOptions(prop: unknown): string[] {
+  const p = prop as {
+    select?: { options?: { name: string }[] };
+    multi_select?: { options?: { name: string }[] };
+  };
+  const options = p?.multi_select?.options ?? p?.select?.options ?? [];
+  return options.map((o) => o.name);
+}
+
+/**
+ * Lee de Notion las opciones que se pueden elegir en cada base.
+ * Cada base mantiene sus propias listas, no se mezclan.
+ */
+export async function getDatabaseOptions(): Promise<AppOptions> {
+  const [done, planned] = await Promise.all([
+    notionFetch(`/databases/${databaseId}`),
+    notionFetch(`/databases/${plannedDbId}`),
+  ]);
+
+  return {
+    hechas: {
+      categorias: extractPropertyOptions(done.properties?.['Categoría']),
+      tipos: extractPropertyOptions(done.properties?.['Tipo']),
+      nivelIvan: extractPropertyOptions(done.properties?.['Nivel de gusto Iván']),
+      nivelVero: extractPropertyOptions(done.properties?.['Nivel de gusto Vero']),
+    },
+    planificadas: {
+      categorias: extractPropertyOptions(planned.properties?.['Categoría']),
+      tipos: extractPropertyOptions(planned.properties?.['Tipo']),
+    },
+  };
 }

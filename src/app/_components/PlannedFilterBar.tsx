@@ -1,6 +1,6 @@
 'use client';
 
-import { CATEGORIAS, TIPOS } from '../_lib/types';
+import { useOptions } from '../_lib/useOptions';
 import type { ViewMode } from './FilterBar';
 
 export type PlannedSortOption = 'nombre-asc' | 'nombre-desc';
@@ -19,6 +19,8 @@ interface PlannedFilterBarProps {
 }
 
 export default function PlannedFilterBar(props: PlannedFilterBarProps) {
+  const options = useOptions().planificadas;
+
   return (
     <div className="space-y-3 mb-6">
       <input
@@ -36,7 +38,7 @@ export default function PlannedFilterBar(props: PlannedFilterBarProps) {
           className="rounded-lg border border-border bg-bg-card px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">Todas las categorías</option>
-          {CATEGORIAS.map((c) => (
+          {options.categorias.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
@@ -47,7 +49,7 @@ export default function PlannedFilterBar(props: PlannedFilterBarProps) {
           className="rounded-lg border border-border bg-bg-card px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">Todos los tipos</option>
-          {TIPOS.map((t) => (
+          {options.tipos.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>

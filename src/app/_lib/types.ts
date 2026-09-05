@@ -41,6 +41,29 @@ export interface ShoppingItem {
   checked: boolean;
 }
 
+/**
+ * Opciones seleccionables, leídas del esquema de cada base de Notion.
+ * Las dos bases llevan sus listas por separado a propósito.
+ */
+export interface RecipeOptions {
+  categorias: string[];
+  tipos: string[];
+  nivelIvan: string[];
+  nivelVero: string[];
+}
+
+export interface PlannedOptions {
+  categorias: string[];
+  tipos: string[];
+}
+
+export interface AppOptions {
+  hechas: RecipeOptions;
+  planificadas: PlannedOptions;
+}
+
+// Listas de respaldo: se usan si Notion no responde o si alguna
+// propiedad cambia de nombre y llega vacía.
 export const CATEGORIAS = [
   'Airfryer',
   'Vitrocerámica',
