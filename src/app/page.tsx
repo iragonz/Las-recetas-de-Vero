@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type { Recipe, PlannedRecipe } from './_lib/types';
 import RecipeCard from './_components/RecipeCard';
 import RecipeListItem from './_components/RecipeListItem';
@@ -12,8 +12,8 @@ import type { SortOption, ViewMode } from './_components/FilterBar';
 import type { PlannedSortOption } from './_components/PlannedFilterBar';
 import RandomRecipeButton from './_components/RandomRecipeButton';
 import Link from 'next/link';
-
-type Tab = 'hechas' | 'planificadas';
+import type { Tab } from './_lib/viewState';
+import { readListView, writeFilters, writeScrollY } from './_lib/viewState';
 
 const RATING_ORDER: Record<string, number> = {
   'Sobresaliente': 4,
@@ -46,30 +46,96 @@ function sortRecipes(recipes: Recipe[], sort: SortOption): Recipe[] {
   }
 }
 
+// Saber si ya estamos en el navegador sin desajustar el HTML que llega
+// del servidor: en servidor devuelve false y en cliente true, y React se
+// encarga de la transición sin avisos de hidratación.
+const sinSuscripcion = () => () => {};
+const enNavegador = () => true;
+const enServidor = () => false;
+
 export default function Home() {
-  const [tab, setTab] = useState<Tab>('hechas');
+  // Dónde estabas la última vez. Se lee una sola vez, al montar.
+  const [saved] = useState(readListView);
+  const hidratado = useSyncExternalStore(sinSuscripcion, enNavegador, enServidor);
+
+  const [tab, setTab] = useState<Tab>(saved.tab);
 
   // Hechas state
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(true);
-  const [search, setSearch] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [tipo, setTipo] = useState('');
-  const [soloFavoritos, setSoloFavoritos] = useState(false);
-  const [valoracion, setValoracion] = useState('');
-  const [sort, setSort] = useState<SortOption>('nombre-asc');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [search, setSearch] = useState(saved.hechas.search);
+  const [categoria, setCategoria] = useState(saved.hechas.categoria);
+  const [tipo, setTipo] = useState(saved.hechas.tipo);
+  const [soloFavoritos, setSoloFavoritos] = useState(saved.hechas.soloFavoritos);
+  const [valoracion, setValoracion] = useState(saved.hechas.valoracion);
+  const [sort, setSort] = useState<SortOption>(saved.hechas.sort);
+  const [viewMode, setViewMode] = useState<ViewMode>(saved.hechas.viewMode);
   const [error, setError] = useState('');
 
   // Planificadas state
   const [planned, setPlanned] = useState<PlannedRecipe[]>([]);
   const [loadingPlanned, setLoadingPlanned] = useState(true);
-  const [pSearch, setPSearch] = useState('');
-  const [pCategoria, setPCategoria] = useState('');
-  const [pTipo, setPTipo] = useState('');
-  const [pSort, setPSort] = useState<PlannedSortOption>('nombre-asc');
-  const [pViewMode, setPViewMode] = useState<ViewMode>('grid');
+  const [pSearch, setPSearch] = useState(saved.planificadas.search);
+  const [pCategoria, setPCategoria] = useState(saved.planificadas.categoria);
+  const [pTipo, setPTipo] = useState(saved.planificadas.tipo);
+  const [pSort, setPSort] = useState<PlannedSortOption>(saved.planificadas.sort);
+  const [pViewMode, setPViewMode] = useState<ViewMode>(saved.planificadas.viewMode);
   const [pError, setPError] = useState('');
+
+  // Apuntar pestaña y filtros cada vez que cambian.
+  useEffect(() => {
+    if (!hidratado) return;
+    writeFilters({
+      tab,
+      hechas: { search, categoria, tipo, soloFavoritos, valoracion, sort, viewMode },
+      planificadas: { search: pSearch, categoria: pCategoria, tipo: pTipo, sort: pSort, viewMode: pViewMode },
+    });
+  }, [hidratado, tab, search, categoria, tipo, soloFavoritos, valoracion, sort, viewMode,
+      pSearch, pCategoria, pTipo, pSort, pViewMode]);
+
+  // Apuntar la posición mientras te desplazas, con freno para no escribir
+  // en cada píxel.
+  useEffect(() => {
+    if (!hidratado) return;
+    let esperando = false;
+    function onScroll() {
+      if (esperando) return;
+      esperando = true;
+      setTimeout(() => {
+        writeScrollY(window.scrollY);
+        esperando = false;
+      }, 200);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [hidratado]);
+
+  // Volver a la posición guardada, una sola vez y solo cuando la lista de
+  // la pestaña activa ya está pintada.
+  const listaPintada = tab === 'hechas' ? !loadingRecipes : !loadingPlanned;
+  const scrollRestaurado = useRef(false);
+  useEffect(() => {
+    if (scrollRestaurado.current || !hidratado || !listaPintada) return;
+    scrollRestaurado.current = true;
+
+    const destino = saved.scrollY;
+    if (destino <= 0) return;
+
+    // Justo tras cargar, la lista puede no haber alcanzado su altura
+    // final: el navegador nos dejaría más arriba. Reintentamos unos
+    // cuantos fotogramas hasta llegar.
+    let intentos = 0;
+    let raf = 0;
+    function irADestino() {
+      window.scrollTo(0, destino);
+      if (Math.abs(window.scrollY - destino) > 2 && intentos < 15) {
+        intentos += 1;
+        raf = requestAnimationFrame(irADestino);
+      }
+    }
+    raf = requestAnimationFrame(irADestino);
+    return () => cancelAnimationFrame(raf);
+  }, [hidratado, listaPintada, saved.scrollY]);
 
   // Las dos listas se cargan al abrir: el dado necesita ambas aunque no
   // hayas entrado todavía en la pestaña "Por hacer".
@@ -118,6 +184,17 @@ export default function Home() {
     if (pSort === 'nombre-desc') return sorted.sort((a, b) => b.nombre.localeCompare(a.nombre, 'es'));
     return sorted.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   }, [planned, pSearch, pCategoria, pTipo, pSort]);
+
+  // Hasta que el navegador toma el relevo mostramos el mismo cargando que
+  // pinta el servidor. Así los filtros guardados no provocan un desajuste
+  // de hidratación, y de todas formas aquí las recetas aún están llegando.
+  if (!hidratado) {
+    return (
+      <div className="flex justify-center py-20">
+        <div className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div>
