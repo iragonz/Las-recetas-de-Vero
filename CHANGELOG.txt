@@ -3,10 +3,37 @@
  Historial de versiones
 ===============================================================
 
- Versión actual: 1.2.0  (5 de septiembre de 2026)
+ Versión actual: 1.3.0  (20 de septiembre de 2026)
 
  Repositorio: github.com/iragonz/Las-recetas-de-Vero
  Se despliega solo en Vercel al subir cambios a la rama "main".
+
+
+---------------------------------------------------------------
+ 1.3.0  ·  20 de septiembre de 2026
+---------------------------------------------------------------
+
+ La lista recuerda dónde estabas.
+
+ * Al entrar en una receta y volver atrás, la app te devuelve al
+   punto exacto de la lista en el que estabas, en vez de mandarte
+   arriba del todo.
+
+ * También recuerda la pestaña en la que estabas (Hechas o Por
+   hacer), lo que hubieras buscado, los filtros, el orden y si
+   tenías la vista de tarjetas o de lista. Hacía falta: volver a la
+   posición sin los filtros puestos te habría dejado en un sitio
+   equivocado.
+
+ * Lo recuerda mientras la app está abierta. Si la cierras del todo
+   y la vuelves a abrir, empiezas limpio: arriba, en Hechas y sin
+   filtros.
+
+ * Si borras una receta o pulsas "Ya la hicimos", la lista cambia de
+   largo y la posición será aproximada en vez de exacta.
+
+ Nota: tocar "Recetas" en la barra de abajo también te devuelve
+ donde estabas, no al principio.
 
 
 ---------------------------------------------------------------
